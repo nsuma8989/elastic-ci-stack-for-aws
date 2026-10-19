@@ -1,0 +1,32 @@
+---
+# Validation snippet for the Elastic CI Mode / dangling-instance issue.
+# This is intended to be merged into templates/aws-stack.yml.
+
+Parameters:
+  MinSize:
+    Type: Number
+    Default: 0
+
+  MaxSize:
+    Type: Number
+    Default: 0
+
+  ScalerEnableExperimentalElasticCIMode:
+    Type: String
+    Default: "false"
+
+Rules:
+  ElasticCIModeRequiresVariableSize:
+    Assertions:
+      - Assert:
+          Fn::Or:
+            - Fn::Equals:
+                - Ref: ScalerEnableExperimentalElasticCIMode
+                - "false"
+            - Fn::Not:
+                Fn::Equals:
+                  - Ref: MinSize
+                  - Ref: MaxSize
+        AssertDescription: >-
+          ScalerEnableExperimentalElasticCIMode=true requires MinSize != MaxSize.
+          Either set MinSize != MaxSize (a variable-sized ASG) or disable the experimental flag.
